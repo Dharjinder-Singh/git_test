@@ -1,0 +1,52 @@
+% Delta Modulation Simulation in Matlab
+clear all;
+close all;
+clc;
+fm=20;
+fs=50*fm;
+Ts=1/fs;
+Am=2;
+t=[0:Ts:1/fm];
+Ns=length(t);
+vin=[Am*sin(2*pi*fm*t)];
+sum=0;
+delta=2*pi*fm*Am*Ts;
+dm=zeros(1,Ns);
+for i=1:Ns
+   if (vin(i)-sum)>0
+      sum=sum+delta;
+      dm(i)=1;
+   else
+      sum=sum-delta;
+      dm(i)=0;
+   end
+   vout(i)=sum;
+end
+figure(1);
+[xx,yy]=stairs(t,vout);
+subplot(2,1,1)
+plot(t,vin,'b',xx,yy,'r');
+title('In: 20Hz sin, delta modulation (fs=1000Hz)');
+grid on;   
+subplot(2,1,2);
+stem(t,dm,'b');
+title('DM Output');
+% demodulation
+sum=0;
+for i=1:Ns
+   if (dm(i)==1)
+      sum=sum+delta;
+   else
+      sum=sum-delta;
+   end
+   vout(i)=sum;
+end
+xhat=smooth(vout);
+figure(2);
+[xx,yy]=stairs(t,vout);
+plot(t,xhat,'b',xx,yy,'r');
+title('Recovered DM signal');
+grid on;  
+SNR=3* fs^3/8*pi^2*fm^3;
+SNRdB=10*log10(SNR)
+
